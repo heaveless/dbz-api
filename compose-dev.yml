@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  mongoku:
+    image: huggingface/mongoku:latest
+    container_name: mongoku
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "8082:3100"
+    environment:
+      MONGOKU_DEFAULT_HOST: "mongodb://mongo:27017"
+
+volumes:
+  dbdata:
+ 
