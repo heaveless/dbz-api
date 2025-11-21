@@ -1,12 +1,13 @@
 version: "3.8"
 
 services:
-  mongo:
+  mongodb:
     image: mongo:6.0
-    container_name: mongo
+    container_name: mongodb
     restart: unless-stopped
+    env_file: .env
     ports:
-      - "27017:27017"
+      - "$DB_PORT:$DB_PORT"
     volumes:
       - mongodb_data:/data/db
 
@@ -15,12 +16,12 @@ services:
     container_name: mongoku
     restart: unless-stopped
     depends_on:
-      - mongo
+      - mongodb
     ports:
       - "8082:3100"
     environment:
-      MONGOKU_DEFAULT_HOST: "mongodb://mongo:27017"
+      MONGOKU_DEFAULT_HOST: "mongodb://mongodb:$DB_PORT"
 
 volumes:
-  dbdata:
+  mongodb_data:
  

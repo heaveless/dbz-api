@@ -23,8 +23,15 @@ func NewHttpWithBreaker(timeout time.Duration) ExternalClient {
 		Timeout:     5 * time.Second,
 	}
 
+	return NewHttpWithBreakerRef(
+		&http.Client{Timeout: timeout},
+		settings,
+	)
+}
+
+func NewHttpWithBreakerRef(client *http.Client, settings gobreaker.Settings) ExternalClient {
 	return &HttpWithCircuitBreaker{
-		client:         &http.Client{Timeout: timeout},
+		client:         client,
 		circuitBreaker: gobreaker.NewCircuitBreaker(settings),
 	}
 }

@@ -16,8 +16,16 @@ build:
 	@echo "Binary generated at: $(OUTPUT)"
 
 test:
+	@echo "Running unit tests..."
+	@go test ./tests/... -v
+
+coverage:
 	@echo "Running tests with coverage..."
-	@go test ./... -cover -race
+	@go test ./... \
+		-coverpkg=./internal/... \
+		-coverprofile=coverage.out
+	@go tool cover -func=coverage.out
+	@go tool cover -html=coverage.out -o coverage.html
 
 lint:
 	@echo "Running golangci-lint..."

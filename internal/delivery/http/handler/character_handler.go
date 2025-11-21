@@ -1,21 +1,26 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	application "github.com/heaveless/dbz-api/internal/application/character"
+	domain "github.com/heaveless/dbz-api/internal/domain/character"
 )
 
+type CharacterService interface {
+	GetByName(ctx context.Context, name string) (*domain.CharacterDTO, error)
+}
+
 type CharacterHandler struct {
-	service *application.CharacterService
+	service CharacterService
 }
 
 type getCharacterRequest struct {
 	Name string `json:"name" binding:"required"`
 }
 
-func NewCharacterHandler(s *application.CharacterService) *CharacterHandler {
+func NewCharacterHandler(s CharacterService) *CharacterHandler {
 	return &CharacterHandler{service: s}
 }
 

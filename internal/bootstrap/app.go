@@ -25,8 +25,9 @@ func App() Application {
 	app.Db = NewDatabase(app.Env)
 
 	collection := app.Db.Database(app.Env.DBName).Collection("characters")
+	dbCollection := breaker.NewMongoDbCollection(collection)
 
-	dbBreaker := breaker.NewDbCollectionWithBreaker(collection, 3*time.Second)
+	dbBreaker := breaker.NewDbCollectionWithBreaker(dbCollection, 3*time.Second)
 	httpBreaker := breaker.NewHttpWithBreaker(3 * time.Second)
 
 	characterRepo := repositoy.NewCharacterRepository(dbBreaker)

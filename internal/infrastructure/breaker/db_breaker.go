@@ -15,7 +15,7 @@ type DbCollection interface {
 		ctx context.Context,
 		filter any,
 		opts ...options.Lister[options.FindOneOptions],
-	) (*mongo.SingleResult, error)
+	) (SingleResult, error)
 
 	InsertOne(
 		ctx context.Context,
@@ -25,13 +25,13 @@ type DbCollection interface {
 }
 
 type DbCollectionWithBreaker struct {
-	collection     *mongo.Collection
+	collection     DbCollection
 	circuitBreaker *gobreaker.CircuitBreaker
 }
 
-func NewDbCollectionWithBreaker(collection *mongo.Collection, timeout time.Duration) DbCollection {
+func NewDbCollectionWithBreaker(collection DbCollection, timeout time.Duration) DbCollection {
 	settings := gobreaker.Settings{
-		Name:        "db-breaker:" + collection.Name(),
+		Name:        "db-breaker",
 		MaxRequests: 5,
 		Timeout:     timeout,
 		ReadyToTrip: func(c gobreaker.Counts) bool {
@@ -53,15 +53,21 @@ func (c *DbCollectionWithBreaker) FindOne(
 	ctx context.Context,
 	filter any,
 	opts ...options.Lister[options.FindOneOptions],
-) (*mongo.SingleResult, error) {
+) (SingleResult, error) {
+
 	res, err := c.circuitBreaker.Execute(func() (any, error) {
-		sr := c.collection.FindOne(ctx, filter, opts...)
+		sr, err := c.collection.FindOne(ctx, filter, opts...)
+		if err != nil {
+			return nil, err
+		}
+
 		if err := sr.Err(); err != nil {
 			if errors.Is(err, mongo.ErrNoDocuments) {
 				return sr, nil
 			}
 			return nil, err
 		}
+
 		return sr, nil
 	})
 
@@ -69,7 +75,7 @@ func (c *DbCollectionWithBreaker) FindOne(
 		return nil, err
 	}
 
-	return res.(*mongo.SingleResult), nil
+	return res.(SingleResult), nil
 }
 
 func (c *DbCollectionWithBreaker) InsertOne(
@@ -78,10 +84,29 @@ func (c *DbCollectionWithBreaker) InsertOne(
 	opts ...options.Lister[options.InsertOneOptions],
 ) (*mongo.InsertOneResult, error) {
 	res, err := c.circuitBreaker.Execute(func() (any, error) {
-		return c.collection.InsertOne(ctx, document, opts...)
+		insertResult, err := c.collection.InsertOne(ctx, document, opts...)
+		if err != nil {
+			var writeErr mongo.WriteException
+			if errors.As(err, &writeErr) {
+				for _, e := range writeErr.WriteErrors {
+					// 11000 = duplicate key error
+					if e.Code == 11000 {
+						return &mongo.InsertOneResult{
+							InsertedID: nil,
+						}, nil
+					}
+				}
+			}
+
+			return nil, err
+		}
+
+		return insertResult, nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return res.(*mongo.InsertOneResult), nil
 }
