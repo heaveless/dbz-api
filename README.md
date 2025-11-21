@@ -1,4 +1,6 @@
-# DBZ API – Servicio de Personajes (Go + Gin)
+# DBZ API (Go + Gin)
+
+![Hero](https://github.com/heaveless/dbz-api/blob/master/assets/hero.png?raw=true)
 
 Este proyecto expone una **API REST** para obtener información de personajes (por ejemplo, personajes de Dragon Ball u otro universo ficticio).
 
@@ -15,6 +17,22 @@ Además, implementa una lógica de **fallback**:
 2. Si no existe (o hay un error que cumple ciertas condiciones), consulta una **API externa** usando un cliente HTTP protegido con **circuit breaker**.
 3. Si la API externa responde correctamente, el personaje se **guarda en la base de datos** y se devuelve al cliente.
 4. Si la llamada externa también falla, se devuelve un **error controlado** al cliente.
+
+## Índice
+
+- [DBZ API (Go + Gin)](#dbz-api-go--gin)
+- [1. Requisitos previos](#1-requisitos-previos)
+- [2. Clonar el proyecto](#2-clonar-el-proyecto)
+- [3. Configuración de entorno](#3-configuración-de-entorno)
+  - [3.1. Variables mínimas necesarias](#31-variables-mínimas-necesarias)
+- [4. Levantar infraestructura (MongoDB con Docker)](#4-levantar-infraestructura-mongodb-con-docker)
+  - [4.1. Archivo docker-compose.yml de ejemplo](#41-archivo-docker-composeyml-de-ejemplo)
+  - [4.2. Levantar Contenedores](#42-levantar-contenedores)
+- [5. Endpoints de la API](#5-endpoints-de-la-api)
+  - [5.1. Obtener personaje por nombre](#51-obtener-personaje-por-nombre)
+  - [8.2. Respuesta esperada](#82-respuesta-esperada)
+- [9. Arquitectura en capas](#9-arquitectura-en-capas)
+- [10. Diagrama de secuencias](#10-diagrama-de-secuencias)
 
 ---
 
@@ -162,3 +180,7 @@ Estamos aplicando una arquitectura en capas inspirada en **Clean Architecture** 
 - **Utilidades transversales** → helpers genéricos (fallback, etc.)
 
 ![Clean Architecture Diagram](https://github.com/heaveless/dbz-api/blob/master/assets/architecture.jpg?raw=true)
+
+## 10. Diagrama de secuencias
+
+![Secuence Diagram](https://github.com/heaveless/dbz-api/blob/master/assets/secuence.png?raw=true)
