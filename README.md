@@ -1,6 +1,6 @@
-# DBZ API (Go + Gin)
-
 ![Hero](https://github.com/heaveless/dbz-api/blob/master/assets/hero.png?raw=true)
+
+# DBZ API (Go + Gin)
 
 Este proyecto expone una **API REST** para obtener información de personajes (por ejemplo, personajes de Dragon Ball u otro universo ficticio).
 
